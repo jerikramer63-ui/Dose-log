@@ -321,6 +321,10 @@
           <label>Vial size (mL)</label>
           <input type="number" id="p-size" step="0.01" min="0" placeholder="e.g. 3">
         </div>
+        <div class="field">
+          <label>Dosing frequency (days)</label>
+          <input type="number" id="p-freq" step="0.25" min="0.01" inputmode="decimal" placeholder="e.g. 3">
+        </div>
       </div>
       <div class="field-row">
         <div class="field" style="grid-column:1/-1;">
@@ -522,6 +526,8 @@ function renderVials(){
         <span class="conc-line">${p.concentration} mg/mL</span>
         <div class="stat-line"><b>${rem.toFixed(2)} mL</b> remaining of ${p.vial.totalMl} mL</div>
         <div class="stat-line">vial started ${formatDate(p.vial.startDate)}</div>
+        ${p.dosingIntervalDays ? `<div class="stat-line"><b>Dosing:</b> ${formatFrequency(p.dosingIntervalDays)}</div>` : `<div class="stat-line"><b>Dosing:</b> not set</div>`}
+        ${(()=>{ const next=nextDoseForPeptide(p); return next==='pending' ? `<div class="stat-line"><b>Next dose:</b> after first logged dose</div>` : next ? `<div class="stat-line"><b>Next dose:</b> ${formatDateTime(next.toISOString())}</div>` : ''; })()}
         ${p.notes ? `<div class="stat-line">${escapeHtml(p.notes)}</div>` : ''}
         <div class="card-actions">
           <button class="btn-ghost" onclick="quickLog('${p.id}')">Log dose</button>
@@ -563,13 +569,19 @@ async function makeStoredVialCurrent(vialId){
   if(isNaN(totalMl) || totalMl<=0){ showToast('Enter a valid reconstitution volume'); return; }
   const concentration = sv.strengthMg / totalMl;
   let p = DATA.peptides.find(x=>x.name.trim().toLowerCase()===sv.name.trim().toLowerCase());
+  const currentFreq = p && p.dosingIntervalDays ? p.dosingIntervalDays : '';
+  const freqStr = prompt(`Dosing frequency in days (optional):`, currentFreq);
+  if(freqStr===null) return;
+  const freq = freqStr.trim()==='' ? null : parseFloat(freqStr);
+  if(freq!==null && (isNaN(freq) || freq<=0)){ showToast('Enter a valid dosing frequency'); return; }
   if(p){
     const rem = remainingMl(p);
     if(rem > 0.001 && !confirm(`${p.name} already has a current vial with about ${rem.toFixed(2)} mL remaining. Replace it with this newly reconstituted vial?`)) return;
     p.concentration = concentration;
     p.vial = {id:uid(), startDate:new Date().toISOString(), totalMl};
+    if(freq!==null) p.dosingIntervalDays = freq;
   }else{
-    p = {id:uid(), name:sv.name, concentration, notes:'', vial:{id:uid(), startDate:new Date().toISOString(), totalMl}};
+    p = {id:uid(), name:sv.name, concentration, dosingIntervalDays:freq, notes:'', vial:{id:uid(), startDate:new Date().toISOString(), totalMl}};
     DATA.peptides.push(p);
   }
   sv.quantity -= 1;
@@ -617,6 +629,29 @@ function formatDateTime(iso){
   const d = new Date(iso);
   if(isNaN(d)) return iso;
   return d.toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+}
+
+function formatFrequency(days){
+  const n = Number(days);
+  if(!isFinite(n) || n<=0) return '';
+  return Number.isInteger(n) ? `every ${n} day${n===1?'':'s'}` : `every ${n} days`;
+}
+
+function latestLogForPeptide(peptideId){
+  return DATA.logs
+    .filter(l=>l.peptideId===peptideId && l.date)
+    .sort((a,b)=>new Date(b.date)-new Date(a.date))[0] || null;
+}
+
+function nextDoseForPeptide(p){
+  const days = Number(p.dosingIntervalDays);
+  if(!isFinite(days) || days<=0) return null;
+  const latest = latestLogForPeptide(p.id);
+  if(!latest) return 'pending';
+  const d = new Date(latest.date);
+  if(isNaN(d)) return null;
+  d.setTime(d.getTime() + days*24*60*60*1000);
+  return d;
 }
 
 function populatePeptideSelects(){
@@ -755,9 +790,14 @@ async function editVial(peptideId){
   if(concStr===null) return;
   const conc = parseFloat(concStr);
   if(isNaN(conc) || conc<=0){ showToast('Enter a valid concentration'); return; }
+  const freqStr = prompt(`Dosing frequency in days (leave blank for none):`, p.dosingIntervalDays || '');
+  if(freqStr===null) return;
+  const freq = freqStr.trim()==='' ? null : parseFloat(freqStr);
+  if(freq!==null && (isNaN(freq) || freq<=0)){ showToast('Enter a valid dosing frequency'); return; }
   p.vial.totalMl = size;
   if(!isNaN(startDate)) p.vial.startDate = startDate.toISOString();
   p.concentration = conc;
+  p.dosingIntervalDays = freq;
   await saveData();
   render();
   showToast('Vial updated');
@@ -878,19 +918,22 @@ document.getElementById('saveAddPeptide').addEventListener('click', async ()=>{
   const name = document.getElementById('p-name').value.trim();
   const conc = parseFloat(document.getElementById('p-conc').value);
   const size = parseFloat(document.getElementById('p-size').value);
+  const freqRaw = document.getElementById('p-freq').value.trim();
+  const freq = freqRaw==='' ? null : parseFloat(freqRaw);
   const notes = document.getElementById('p-notes').value.trim();
-  if(!name || isNaN(conc) || conc<=0 || isNaN(size) || size<=0){
-    showToast('Fill in name, concentration, and vial size');
+  if(!name || isNaN(conc) || conc<=0 || isNaN(size) || size<=0 || (freq!==null && (isNaN(freq) || freq<=0))){
+    showToast('Fill in name, concentration, vial size, and a valid frequency');
     return;
   }
   DATA.peptides.push({
     id: uid(),
-    name, concentration: conc, notes,
+    name, concentration: conc, dosingIntervalDays: freq, notes,
     vial: { id: uid(), startDate: new Date().toISOString(), totalMl: size }
   });
   document.getElementById('p-name').value='';
   document.getElementById('p-conc').value='';
   document.getElementById('p-size').value='';
+  document.getElementById('p-freq').value='';
   document.getElementById('p-notes').value='';
   document.getElementById('addPeptideForm').classList.add('hidden');
   await saveData();
