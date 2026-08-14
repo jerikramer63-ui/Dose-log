@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dosing Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF8F3;
+    --card:#FFFEFB;
+    --ink:#20262B;
+    --ink-soft:#6B7178;
+    --line:#DED7C8;
+    --line-strong:#C7BEAC;
+    --teal:#3E7A75;
+    --teal-deep:#2C5854;
+    --amber:#C1873B;
+    --red:#B0503A;
+    --teal-tint:#EAF2F0;
+    --red-tint:#F7EBE7;
+    --amber-tint:#FBF1E4;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    padding:32px 20px 80px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+
+  /* Header — apothecary label */
+  .label-header{
+    border:1.5px solid var(--ink);
+    border-radius:3px;
+    padding:18px 24px;
+    margin-bottom:28px;
+    background:var(--card);
+    position:relative;
+  }
+  .label-header::before{
+    content:'';
+    position:absolute;
+    top:6px;left:6px;right:6px;bottom:6px;
+    border:1px solid var(--line-strong);
+    border-radius:2px;
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:.18em;
+    color:var(--teal-deep);
+    text-transform:uppercase;
+    margin:0 0 4px;
+  }
+  .label-header h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:32px;
+    margin:0;
+    letter-spacing:-.01em;
+  }
+  .label-header p{
+    margin:6px 0 0;
+    font-size:13.5px;
+    color:var(--ink-soft);
+  }
+
+  h2.section-title{
+    font-family:'Fraunces',serif;
+    font-size:19px;
+    font-weight:600;
+    margin:0 0 14px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  h2.section-title .idx{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    font-weight:400;
+  }
+
+  section{margin-bottom:38px;}
+
+  /* Vial cards */
+  .vial-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+    gap:14px;
+  }
+  .vial-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px 16px 14px;
+    display:flex;
+    gap:14px;
+  }
+  .gauge-col{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;}
+  .gauge-pct{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+  .card-body{flex:1;min-width:0;}
+  .card-body h3{
+    font-family:'Fraunces',serif;
+    font-size:17px;
+    margin:0 0 2px;
+    font-weight:600;
+  }
+  .conc-line{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--teal-deep);
+    background:var(--teal-tint);
+    display:inline-block;
+    padding:2px 7px;
+    border-radius:3px;
+    margin-bottom:8px;
+  }
+  .stat-line{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:2px 0;
+  }
+  .stat-line b{color:var(--ink);font-weight:600;}
+  .card-actions{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;}
+
+  button{
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    border:none;
+    border-radius:5px;
+    font-size:12.5px;
+    font-weight:600;
+    padding:7px 12px;
+    transition:opacity .15s;
+  }
+  button:hover{opacity:.85;}
+  button:active{opacity:.7;}
+  .btn-primary{background:var(--teal);color:#fff;}
+  .btn-ghost{background:transparent;color:var(--teal-deep);border:1px solid var(--line-strong);}
+  .btn-danger-ghost{background:transparent;color:var(--red);border:1px solid var(--line-strong);}
+  .btn-add{
+    background:var(--ink);color:#fff;
+    padding:9px 16px;font-size:13px;
+  }
+
+  /* Forms */
+  .form-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:18px 20px;
+  }
+  .field-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:12px;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  .field input, .field select, .field textarea{
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    padding:8px 10px;
+    border:1px solid var(--line-strong);
+    border-radius:5px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:2px solid var(--teal);
+    outline-offset:-1px;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .computed-ml{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--teal-deep);
+    margin-top:4px;
+  }
+  .form-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:4px;}
+
+  /* History table */
+  .hist-controls{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+  .hist-controls select{
+    font-family:'Inter',sans-serif;font-size:13px;
+    padding:6px 10px;border:1px solid var(--line-strong);border-radius:5px;background:#fff;
+  }
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  thead th{
+    text-align:left;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    padding:10px 12px;
+    border-bottom:1px solid var(--line);
+    background:#F3EFE6;
+  }
+  tbody td{
+    padding:10px 12px;
+    font-size:13px;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#FBF9F4;}
+  .dose-cell{font-family:'JetBrains Mono',monospace;font-size:12.5px;}
+  .del-btn{
+    background:none;border:none;color:var(--ink-soft);
+    font-size:12px;padding:2px 6px;cursor:pointer;
+  }
+  .del-btn:hover{color:var(--red);}
+  .empty-note{
+    color:var(--ink-soft);
+    font-size:13px;
+    padding:24px;
+    text-align:center;
+    background:var(--card);
+    border:1px dashed var(--line-strong);
+    border-radius:8px;
+  }
+  .new-vial-tag{
+    display:inline-block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    color:var(--teal-deep);
+    background:var(--teal-tint);
+    padding:1px 6px;
+    border-radius:3px;
+    margin-left:6px;
+  }
+  .toast{
+    position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#fff;
+    padding:9px 18px;border-radius:20px;font-size:13px;
+    opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+  select[disabled], input[disabled]{opacity:.55;}
+  .hidden{display:none !important;}
+
+
+  /* Mobile layout */
+  .data-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+  @media (max-width:640px){
+    body{padding:16px 12px 48px;}
+    .label-header{padding:16px 18px;margin-bottom:22px;}
+    .label-header h1{font-size:28px;}
+    section{margin-bottom:28px;}
+    .vial-grid{grid-template-columns:1fr;}
+    .field-row{grid-template-columns:1fr;gap:10px;}
+    .field{grid-column:1/-1 !important;}
+    .field input, .field select, .field textarea{font-size:16px;min-height:44px;}
+    button{min-height:42px;font-size:13.5px;padding:9px 13px;}
+    .form-footer{justify-content:stretch;}
+    .form-footer button{flex:1;}
+    .card-actions{display:grid;grid-template-columns:1fr 1fr;}
+    .card-actions button:first-child{grid-column:1/-1;}
+    .data-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;}
+    .data-actions .btn-add{grid-column:1/-1;}
+    .hist-controls select{font-size:16px;min-height:44px;width:100%;}
+    table, thead, tbody, tr, th, td{display:block;width:100%;}
+    table{border:none;background:transparent;overflow:visible;}
+    thead{display:none;}
+    tbody{display:grid;gap:12px;}
+    tbody tr{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;}
+    tbody tr:hover{background:var(--card);}
+    tbody td{border-bottom:1px solid var(--line);padding:8px 0;font-size:13.5px;display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:start;}
+    tbody td::before{content:attr(data-label);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:600;}
+    tbody td:last-child{border-bottom:none;display:flex;justify-content:flex-end;gap:8px;padding-bottom:0;}
+    tbody td:last-child::before{display:none;}
+    .dose-cell{font-size:12.5px;}
+    .del-btn{font-size:13px;padding:7px 10px;border:1px solid var(--line-strong);border-radius:5px;}
+    .toast{max-width:calc(100vw - 24px);text-align:center;}
+  }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="label-header">
+    <p class="eyebrow">Rx &nbsp;·&nbsp; Self-administered</p>
+    <h1>Dosing Log</h1>
+    <p>Injection tracking by vial — dose, site, and remaining volume.</p>
+  </div>
+
+  <section>
+    <h2 class="section-title"><span class="idx">01</span> Current vial</h2>
+    <div id="vialGrid" class="vial-grid"></div>
+    <div class="data-actions" style="margin-top:12px;">
+      <button type="button" class="btn-add" id="showAddPeptide" onclick="document.getElementById('addPeptideForm').classList.remove('hidden')">+ Add current vial</button>
+      <button class="btn-ghost" id="exportBackup">Export Backup</button>
+      <button class="btn-ghost" id="importBackup">Import Backup</button>
+      <input type="file" id="importBackupFile" accept="application/json,.json" class="hidden">
+    </div>
+    <div id="addPeptideForm" class="form-card hidden" style="margin-top:12px;">
+      <div class="field-row">
+        <div class="field">
+          <label>Peptide name</label>
+          <input type="text" id="p-name" placeholder="e.g. BPC-157">
+        </div>
+        <div class="field">
+          <label>Concentration (mg/mL)</label>
+          <input type="number" id="p-conc" step="0.001" min="0" placeholder="e.g. 5">
+        </div>
+        <div class="field">
+          <label>Vial size (mL)</label>
+          <input type="number" id="p-size" step="0.01" min="0" placeholder="e.g. 3">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field" style="grid-column:1/-1;">
+          <label>Notes (optional)</label>
+          <input type="text" id="p-notes" placeholder="reconstitution details, source, etc.">
+        </div>
+      </div>
+      <div class="form-footer">
+        <button type="button" class="btn-ghost" id="cancelAddPeptide">Cancel</button>
+        <button type="button" class="btn-primary" id="saveAddPeptide">Save current vial</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title"><span class="idx">02</span> Vials in storage</h2>
+    <div id="storageVialGrid" class="vial-grid"></div>
+    <div style="margin-top:12px;">
+      <button type="button" class="btn-add" id="showAddStoredVial" onclick="document.getElementById('addStoredVialForm').classList.remove('hidden')">+ Add stored vial(s)</button>
+    </div>
+    <div id="addStoredVialForm" class="form-card hidden" style="margin-top:12px;">
+      <div class="field-row">
+        <div class="field">
+          <label>Peptide name</label>
+          <input type="text" id="sv-name" placeholder="e.g. Retatrutide">
+        </div>
+        <div class="field">
+          <label>Vial strength (mg)</label>
+          <input type="number" id="sv-strength" step="0.001" min="0" placeholder="e.g. 10">
+        </div>
+        <div class="field">
+          <label>Number of vials</label>
+          <input type="number" id="sv-qty" step="1" min="1" value="1" inputmode="numeric" placeholder="e.g. 5">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field" style="grid-column:1/-1;">
+          <label>Notes (optional)</label>
+          <input type="text" id="sv-notes" placeholder="source, lot, BUD, storage location, etc.">
+        </div>
+      </div>
+      <div class="form-footer">
+        <button type="button" class="btn-ghost" id="cancelAddStoredVial">Cancel</button>
+        <button type="button" class="btn-primary" id="saveAddStoredVial">Save stored vials</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title"><span class="idx">03</span> Log an injection</h2>
+    <div class="form-card">
+      <div class="field-row">
+        <div class="field">
+          <label>Peptide</label>
+          <select id="log-peptide"></select>
+        </div>
+        <div class="field">
+          <label>Date &amp; time</label>
+          <input type="datetime-local" id="log-date">
+        </div>
+        <div class="field">
+          <label>Dose (mg)</label>
+          <input type="number" id="log-dose-mg" step="0.001" min="0" placeholder="e.g. 0.25">
+        </div>
+        <div class="field">
+          <label>Dose (units, U-100)</label>
+          <input type="number" id="log-dose-units" step="0.1" min="0" placeholder="e.g. 25">
+        </div>
+        <div class="field">
+          <label>Injection site</label>
+          <input type="text" id="log-site" list="site-options" placeholder="e.g. Abdomen (L)">
+          <datalist id="site-options">
+            <option value="Abdomen (L)"><option value="Abdomen (R)">
+            <option value="OLA"><option value="ILA"><option value="IRA"><option value="ORA">
+            <option value="Thigh (L)"><option value="Thigh (R)">
+            <option value="Glute (L)"><option value="Glute (R)">
+            <option value="Upper arm (L)"><option value="Upper arm (R)">
+          </datalist>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field" style="grid-column:1/-1;">
+          <label>Notes (optional)</label>
+          <input type="text" id="log-note" placeholder="e.g. site tenderness, timing relative to meal">
+        </div>
+      </div>
+      <div id="computedMl" class="computed-ml"></div>
+      <div class="form-footer">
+        <button class="btn-primary" id="saveLog">Log dose</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title"><span class="idx">04</span> History</h2>
+    <div class="hist-controls">
+      <select id="filterPeptide"><option value="all">All peptides</option></select>
+    </div>
+    <div id="historyWrap"></div>
+  </section>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+let DATA = { peptides: [], logs: [], storedVials: [] };
+const STORAGE_KEY = 'peptide-tracker-data';
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+async function loadData(){
+  try{
+    let raw = null;
+    if(window.storage && typeof window.storage.get === 'function'){
+      const res = await window.storage.get(STORAGE_KEY, false);
+      raw = res && res.value ? res.value : null;
+    }else{
+      raw = localStorage.getItem(STORAGE_KEY);
+    }
+    if(raw){ DATA = JSON.parse(raw); }
+    if(!Array.isArray(DATA.peptides)) DATA.peptides = [];
+    if(!Array.isArray(DATA.logs)) DATA.logs = [];
+    if(!Array.isArray(DATA.storedVials)) DATA.storedVials = [];
+  }catch(e){ /* no data yet */ }
+  render();
+}
+
+async function saveData(){
+  try{
+    const raw = JSON.stringify(DATA);
+    if(window.storage && typeof window.storage.set === 'function'){
+      await window.storage.set(STORAGE_KEY, raw, false);
+    }else{
+      localStorage.setItem(STORAGE_KEY, raw);
+    }
+  }catch(e){
+    showToast('Save failed — try again');
+  }
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+function currentVial(p){ return p.vial; }
+
+function remainingMl(p){
+  const v = p.vial;
+  if(!v) return 0;
+  const used = DATA.logs.filter(l=>l.vialId===v.id).reduce((s,l)=>s+l.doseMl,0);
+  return Math.max(0, v.totalMl - used);
+}
+
+function pctLeft(p){
+  const v = p.vial;
+  if(!v || !v.totalMl) return 0;
+  return Math.max(0, Math.min(100, (remainingMl(p)/v.totalMl)*100));
+}
+
+function gaugeColor(pct){
+  if(pct > 50) return {fill:'var(--teal)', tint:'var(--teal-tint)'};
+  if(pct > 20) return {fill:'var(--amber)', tint:'var(--amber-tint)'};
+  return {fill:'var(--red)', tint:'var(--red-tint)'};
+}
+
+function vialSVG(pct){
+  const c = gaugeColor(pct);
+  const h = 64, w = 34, fillH = (pct/100)*(h-8);
+  const fillY = h - 4 - fillH;
+  return `<svg width="${w}" height="${h+6}" viewBox="0 0 ${w} ${h+6}" xmlns="http://www.w3.org/2000/svg">
+    <rect x="12" y="0" width="10" height="6" rx="1.5" fill="var(--line-strong)"/>
+    <rect x="4" y="6" width="26" height="${h-6}" rx="4" fill="${c.tint}" stroke="var(--line-strong)" stroke-width="1.2"/>
+    <clipPath id="clip-${Math.round(pct*100)}-${Math.random().toString(36).slice(2,6)}"><rect x="4" y="6" width="26" height="${h-6}" rx="4"/></clipPath>
+    <rect x="4" y="${fillY}" width="26" height="${fillH+4}" fill="${c.fill}" opacity="0.85"/>
+  </svg>`;
+}
+
+function renderVials(){
+  const grid = document.getElementById('vialGrid');
+  if(DATA.peptides.length===0){
+    grid.innerHTML = `<div class="empty-note" style="grid-column:1/-1;">No peptides yet — add one to start tracking.</div>`;
+    return;
+  }
+  grid.innerHTML = DATA.peptides.map(p=>{
+    const pct = pctLeft(p);
+    const rem = remainingMl(p);
+    const dosesLeft = p.concentration>0 ? null : null;
+    return `<div class="vial-card">
+      <div class="gauge-col">
+        ${vialSVG(pct)}
+        <div class="gauge-pct mono">${Math.round(pct)}%</div>
+      </div>
+      <div class="card-body">
+        <h3>${escapeHtml(p.name)}</h3>
+        <span class="conc-line">${p.concentration} mg/mL</span>
+        <div class="stat-line"><b>${rem.toFixed(2)} mL</b> remaining of ${p.vial.totalMl} mL</div>
+        <div class="stat-line">vial started ${formatDate(p.vial.startDate)}</div>
+        ${p.notes ? `<div class="stat-line">${escapeHtml(p.notes)}</div>` : ''}
+        <div class="card-actions">
+          <button class="btn-ghost" onclick="quickLog('${p.id}')">Log dose</button>
+          <button class="btn-ghost" onclick="editVial('${p.id}')">Edit vial</button>
+          <button class="btn-danger-ghost" onclick="startNewVial('${p.id}')">New vial</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderStoredVials(){
+  const grid = document.getElementById('storageVialGrid');
+  if(!DATA.storedVials || DATA.storedVials.length===0){
+    grid.innerHTML = `<div class="empty-note" style="grid-column:1/-1;">No unreconstituted vials in storage.</div>`;
+    return;
+  }
+  grid.innerHTML = DATA.storedVials.map(v=>`<div class="vial-card">
+    <div class="card-body">
+      <h3>${escapeHtml(v.name)}</h3>
+      <span class="conc-line">${v.strengthMg} mg vial · concentration TBD</span>
+      <div class="stat-line"><b>${v.quantity}</b> vial${v.quantity===1?'':'s'} in storage</div>
+      ${v.notes ? `<div class="stat-line">${escapeHtml(v.notes)}</div>` : ''}
+      <div class="card-actions">
+        <button class="btn-primary" onclick="makeStoredVialCurrent('${v.id}')">Reconstitute / Make Current</button>
+        <button class="btn-ghost" onclick="editStoredVial('${v.id}')">Edit</button>
+        <button class="btn-danger-ghost" onclick="deleteStoredVial('${v.id}')">Delete</button>
+      </div>
+    </div>
+  </div>`).join('');
+}
+
+async function makeStoredVialCurrent(vialId){
+  const sv = DATA.storedVials.find(v=>v.id===vialId);
+  if(!sv) return;
+  const mlStr = prompt(`Reconstitute one ${sv.name} ${sv.strengthMg} mg vial.\nHow many mL of diluent did you add?`);
+  if(mlStr===null) return;
+  const totalMl = parseFloat(mlStr);
+  if(isNaN(totalMl) || totalMl<=0){ showToast('Enter a valid reconstitution volume'); return; }
+  const concentration = sv.strengthMg / totalMl;
+  let p = DATA.peptides.find(x=>x.name.trim().toLowerCase()===sv.name.trim().toLowerCase());
+  if(p){
+    const rem = remainingMl(p);
+    if(rem > 0.001 && !confirm(`${p.name} already has a current vial with about ${rem.toFixed(2)} mL remaining. Replace it with this newly reconstituted vial?`)) return;
+    p.concentration = concentration;
+    p.vial = {id:uid(), startDate:new Date().toISOString(), totalMl};
+  }else{
+    p = {id:uid(), name:sv.name, concentration, notes:'', vial:{id:uid(), startDate:new Date().toISOString(), totalMl}};
+    DATA.peptides.push(p);
+  }
+  sv.quantity -= 1;
+  if(sv.quantity<=0) DATA.storedVials = DATA.storedVials.filter(v=>v.id!==sv.id);
+  await saveData();
+  render();
+  showToast(`Current vial: ${concentration.toFixed(3)} mg/mL`);
+}
+
+async function editStoredVial(vialId){
+  const v = DATA.storedVials.find(x=>x.id===vialId);
+  if(!v) return;
+  const strengthStr = prompt('Vial strength in mg:', v.strengthMg);
+  if(strengthStr===null) return;
+  const strength = parseFloat(strengthStr);
+  if(isNaN(strength) || strength<=0){ showToast('Enter a valid vial strength'); return; }
+  const qtyStr = prompt('Quantity in storage:', v.quantity);
+  if(qtyStr===null) return;
+  const qty = parseInt(qtyStr,10);
+  if(isNaN(qty) || qty<1){ showToast('Enter a valid quantity'); return; }
+  const notes = prompt('Notes:', v.notes || '');
+  if(notes===null) return;
+  v.strengthMg = strength; v.quantity = qty; v.notes = notes.trim();
+  await saveData(); render(); showToast('Stored vial updated');
+}
+
+async function deleteStoredVial(vialId){
+  if(!confirm('Delete this stored vial entry?')) return;
+  DATA.storedVials = DATA.storedVials.filter(v=>v.id!==vialId);
+  await saveData(); render();
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+function formatDate(iso){
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+}
+function formatDateTime(iso){
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  return d.toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+}
+
+function populatePeptideSelects(){
+  const logSel = document.getElementById('log-peptide');
+  const filtSel = document.getElementById('filterPeptide');
+  const prevLog = logSel.value, prevFilt = filtSel.value;
+  logSel.innerHTML = DATA.peptides.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+  filtSel.innerHTML = `<option value="all">All peptides</option>` + DATA.peptides.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+  if(DATA.peptides.some(p=>p.id===prevLog)) logSel.value = prevLog;
+  if(prevFilt) filtSel.value = prevFilt;
+  updateComputedMl();
+}
+
+function getActivePeptide(){
+  const pid = document.getElementById('log-peptide').value;
+  return DATA.peptides.find(x=>x.id===pid);
+}
+
+function refreshComputedLine(){
+  const div = document.getElementById('computedMl');
+  const p = getActivePeptide();
+  const mg = parseFloat(document.getElementById('log-dose-mg').value);
+  if(!p || isNaN(mg) || p.concentration<=0){ div.textContent=''; return; }
+  const ml = mg / p.concentration;
+  div.textContent = `= ${ml.toFixed(3)} mL  ·  from ${p.name} (${p.concentration} mg/mL)`;
+}
+
+function syncFromMg(){
+  const p = getActivePeptide();
+  const mgEl = document.getElementById('log-dose-mg');
+  const unitsEl = document.getElementById('log-dose-units');
+  const mg = parseFloat(mgEl.value);
+  if(!p || isNaN(mg) || p.concentration<=0){ refreshComputedLine(); return; }
+  const units = (mg / p.concentration) * 100;
+  unitsEl.value = Math.round(units*10)/10;
+  refreshComputedLine();
+}
+
+function syncFromUnits(){
+  const p = getActivePeptide();
+  const mgEl = document.getElementById('log-dose-mg');
+  const unitsEl = document.getElementById('log-dose-units');
+  const units = parseFloat(unitsEl.value);
+  if(!p || isNaN(units) || p.concentration<=0){ refreshComputedLine(); return; }
+  const mg = (units/100) * p.concentration;
+  mgEl.value = Math.round(mg*1000)/1000;
+  refreshComputedLine();
+}
+
+function updateComputedMl(){
+  // re-derive units from whatever mg currently holds (used after peptide switch)
+  syncFromMg();
+}
+
+function renderHistory(){
+  const filt = document.getElementById('filterPeptide').value || 'all';
+  const wrap = document.getElementById('historyWrap');
+  let logs = [...DATA.logs].sort((a,b)=> new Date(b.date) - new Date(a.date));
+  if(filt !== 'all') logs = logs.filter(l=>l.peptideId===filt);
+  if(logs.length===0){
+    wrap.innerHTML = `<div class="empty-note">No injections logged yet.</div>`;
+    return;
+  }
+  const rows = logs.map(l=>{
+    const p = DATA.peptides.find(x=>x.id===l.peptideId);
+    const name = p ? p.name : '(deleted peptide)';
+    const isNewVial = p && l.vialId === p.vial.id && DATA.logs.filter(x=>x.vialId===l.vialId).sort((a,b)=>new Date(a.date)-new Date(b.date))[0]?.id === l.id && l.isVialStart;
+    return `<tr>
+      <td data-label="Date">${formatDateTime(l.date)}</td>
+      <td data-label="Peptide">${escapeHtml(name)}</td>
+      <td class="dose-cell" data-label="Dose">${l.doseMg!=null ? l.doseMg+' mg / '+l.doseMl.toFixed(3)+' mL / '+(l.doseMl*100).toFixed(1)+' u' : '—'}</td>
+      <td data-label="Site">${escapeHtml(l.site||'—')}</td>
+      <td data-label="Notes">${escapeHtml(l.note||'')}</td>
+      <td data-label="Actions">
+        <button class="del-btn" onclick="editLog('${l.id}')">edit</button>
+        <button class="del-btn" onclick="deleteLog('${l.id}')">delete</button>
+      </td>
+    </tr>`;
+  }).join('');
+  wrap.innerHTML = `<table>
+    <thead><tr><th>Date</th><th>Peptide</th><th>Dose</th><th>Site</th><th>Notes</th><th></th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function render(){
+  renderVials();
+  renderStoredVials();
+  populatePeptideSelects();
+  renderHistory();
+}
+
+// --- Actions ---
+function quickLog(peptideId){
+  document.getElementById('log-peptide').value = peptideId;
+  updateComputedMl();
+  document.getElementById('log-dose-mg').focus();
+  document.getElementById('log-peptide').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+async function startNewVial(peptideId){
+  const p = DATA.peptides.find(x=>x.id===peptideId);
+  if(!p) return;
+  const sizeStr = prompt(`Start a new vial of ${p.name}.\nVial size in mL:`, p.vial.totalMl);
+  if(sizeStr===null) return;
+  const size = parseFloat(sizeStr);
+  if(isNaN(size) || size<=0){ showToast('Enter a valid vial size'); return; }
+  const concStr = prompt(`Concentration in mg/mL (leave as-is if unchanged):`, p.concentration);
+  if(concStr===null) return;
+  const conc = parseFloat(concStr);
+  p.vial = { id: uid(), startDate: new Date().toISOString(), totalMl: size };
+  if(!isNaN(conc) && conc>0) p.concentration = conc;
+  await saveData();
+  render();
+  showToast('New vial started');
+}
+
+async function deleteLog(logId){
+  if(!confirm('Delete this log entry?')) return;
+  DATA.logs = DATA.logs.filter(l=>l.id!==logId);
+  await saveData();
+  render();
+}
+
+async function editVial(peptideId){
+  const p = DATA.peptides.find(x=>x.id===peptideId);
+  if(!p) return;
+  const sizeStr = prompt(`Edit vial for ${p.name}.\nVial size in mL:`, p.vial.totalMl);
+  if(sizeStr===null) return;
+  const size = parseFloat(sizeStr);
+  if(isNaN(size) || size<=0){ showToast('Enter a valid vial size'); return; }
+  const startStr = prompt(`Vial start date (YYYY-MM-DD):`, p.vial.startDate.slice(0,10));
+  if(startStr===null) return;
+  const startDate = new Date(startStr);
+  const concStr = prompt(`Concentration in mg/mL:`, p.concentration);
+  if(concStr===null) return;
+  const conc = parseFloat(concStr);
+  if(isNaN(conc) || conc<=0){ showToast('Enter a valid concentration'); return; }
+  p.vial.totalMl = size;
+  if(!isNaN(startDate)) p.vial.startDate = startDate.toISOString();
+  p.concentration = conc;
+  await saveData();
+  render();
+  showToast('Vial updated');
+}
+
+async function editLog(logId){
+  const l = DATA.logs.find(x=>x.id===logId);
+  if(!l) return;
+  const p = DATA.peptides.find(x=>x.id===l.peptideId);
+  const doseStr = prompt(`Dose in mg:`, l.doseMg);
+  if(doseStr===null) return;
+  const doseMg = parseFloat(doseStr);
+  if(isNaN(doseMg) || doseMg<=0){ showToast('Enter a valid dose'); return; }
+  const dt = new Date(l.date);
+  dt.setMinutes(dt.getMinutes() - dt.getTimezoneOffset());
+  const dateStr = prompt(`Date & time (YYYY-MM-DDTHH:MM):`, dt.toISOString().slice(0,16));
+  if(dateStr===null) return;
+  const site = prompt(`Injection site:`, l.site || '');
+  if(site===null) return;
+  const note = prompt(`Notes:`, l.note || '');
+  if(note===null) return;
+  const newDate = dateStr ? new Date(dateStr) : new Date(l.date);
+  l.doseMg = doseMg;
+  l.doseMl = p ? doseMg / p.concentration : l.doseMl;
+  if(!isNaN(newDate)) l.date = newDate.toISOString();
+  l.site = site.trim();
+  l.note = note.trim();
+  await saveData();
+  render();
+  showToast('Entry updated');
+}
+
+async function exportBackup(){
+  const payload = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    storageKey: STORAGE_KEY,
+    data: DATA
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const d = new Date();
+  const stamp = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  a.href = url;
+  a.download = `peptide-tracker-backup-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showToast('Backup exported');
+}
+
+async function importBackupFile(file){
+  try{
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    const incoming = parsed && parsed.data ? parsed.data : parsed;
+    if(!incoming || !Array.isArray(incoming.peptides) || !Array.isArray(incoming.logs)){
+      showToast('That file is not a valid tracker backup');
+      return;
+    }
+    if(!confirm(`Import this backup?\n\nIt contains ${incoming.peptides.length} current peptide(s), ${(incoming.storedVials||[]).reduce((n,v)=>n+(v.quantity||0),0)} stored vial(s), and ${incoming.logs.length} injection log(s).\n\nThis will replace the data currently stored on this device.`)) return;
+    DATA = incoming;
+    if(!Array.isArray(DATA.storedVials)) DATA.storedVials = [];
+    await saveData();
+    render();
+    showToast('Backup imported');
+  }catch(e){
+    showToast('Could not import backup');
+  }finally{
+    document.getElementById('importBackupFile').value = '';
+  }
+}
+
+// --- Event wiring ---
+document.getElementById('showAddPeptide').addEventListener('click', ()=>{
+  document.getElementById('addPeptideForm').classList.remove('hidden');
+});
+
+document.getElementById('exportBackup').addEventListener('click', exportBackup);
+document.getElementById('importBackup').addEventListener('click', ()=>{
+  document.getElementById('importBackupFile').click();
+});
+document.getElementById('importBackupFile').addEventListener('change', e=>{
+  const file = e.target.files && e.target.files[0];
+  if(file) importBackupFile(file);
+});
+document.getElementById('showAddStoredVial').addEventListener('click', ()=>{
+  document.getElementById('addStoredVialForm').classList.remove('hidden');
+});
+document.getElementById('cancelAddStoredVial').addEventListener('click', ()=>{
+  document.getElementById('addStoredVialForm').classList.add('hidden');
+});
+document.getElementById('saveAddStoredVial').addEventListener('click', async ()=>{
+  const name = document.getElementById('sv-name').value.trim();
+  const strength = parseFloat(document.getElementById('sv-strength').value);
+  const qty = parseInt(document.getElementById('sv-qty').value,10);
+  const notes = document.getElementById('sv-notes').value.trim();
+  if(!name || isNaN(strength) || strength<=0 || isNaN(qty) || qty<1){
+    showToast('Fill in name, vial strength, and number of vials'); return;
+  }
+  const existing = DATA.storedVials.find(v=>v.name.toLowerCase()===name.toLowerCase() && Number(v.strengthMg)===strength && (v.notes||'')===notes);
+  if(existing) existing.quantity += qty;
+  else DATA.storedVials.push({id:uid(), name, strengthMg:strength, quantity:qty, notes});
+  document.getElementById('sv-name').value='';
+  document.getElementById('sv-strength').value='';
+  document.getElementById('sv-qty').value='1';
+  document.getElementById('sv-notes').value='';
+  document.getElementById('addStoredVialForm').classList.add('hidden');
+  await saveData(); render(); showToast(qty === 1 ? 'Stored vial added' : `${qty} stored vials added`);
+});
+
+document.getElementById('cancelAddPeptide').addEventListener('click', ()=>{
+  document.getElementById('addPeptideForm').classList.add('hidden');
+});
+document.getElementById('saveAddPeptide').addEventListener('click', async ()=>{
+  const name = document.getElementById('p-name').value.trim();
+  const conc = parseFloat(document.getElementById('p-conc').value);
+  const size = parseFloat(document.getElementById('p-size').value);
+  const notes = document.getElementById('p-notes').value.trim();
+  if(!name || isNaN(conc) || conc<=0 || isNaN(size) || size<=0){
+    showToast('Fill in name, concentration, and vial size');
+    return;
+  }
+  DATA.peptides.push({
+    id: uid(),
+    name, concentration: conc, notes,
+    vial: { id: uid(), startDate: new Date().toISOString(), totalMl: size }
+  });
+  document.getElementById('p-name').value='';
+  document.getElementById('p-conc').value='';
+  document.getElementById('p-size').value='';
+  document.getElementById('p-notes').value='';
+  document.getElementById('addPeptideForm').classList.add('hidden');
+  await saveData();
+  render();
+  showToast('Peptide added');
+});
+
+document.getElementById('log-peptide').addEventListener('change', updateComputedMl);
+document.getElementById('log-dose-mg').addEventListener('input', syncFromMg);
+document.getElementById('log-dose-units').addEventListener('input', syncFromUnits);
+document.getElementById('filterPeptide').addEventListener('change', renderHistory);
+
+document.getElementById('saveLog').addEventListener('click', async ()=>{
+  const pid = document.getElementById('log-peptide').value;
+  const p = DATA.peptides.find(x=>x.id===pid);
+  if(!p){ showToast('Add a peptide first'); return; }
+  const dateVal = document.getElementById('log-date').value;
+  const doseMg = parseFloat(document.getElementById('log-dose-mg').value);
+  const site = document.getElementById('log-site').value.trim();
+  const note = document.getElementById('log-note').value.trim();
+  if(isNaN(doseMg) || doseMg<=0){ showToast('Enter a dose in mg'); return; }
+  const doseMl = doseMg / p.concentration;
+  const date = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
+  DATA.logs.push({
+    id: uid(), peptideId: p.id, vialId: p.vial.id,
+    date, doseMg, doseMl, site, note
+  });
+  document.getElementById('log-dose-mg').value='';
+  document.getElementById('log-site').value='';
+  document.getElementById('log-note').value='';
+  document.getElementById('computedMl').textContent='';
+  await saveData();
+  render();
+  showToast('Dose logged');
+});
+
+// default datetime to now
+function setNowDefault(){
+  const el = document.getElementById('log-date');
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  el.value = now.toISOString().slice(0,16);
+}
+setNowDefault();
+loadData();
+</script>
+</body>
+</html>
