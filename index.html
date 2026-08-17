@@ -299,82 +299,7 @@
   </div>
 
   <section>
-    <h2 class="section-title"><span class="idx">01</span> Current vial</h2>
-    <div id="vialGrid" class="vial-grid"></div>
-    <div class="data-actions" style="margin-top:12px;">
-      <button type="button" class="btn-add" id="showAddPeptide" onclick="document.getElementById('addPeptideForm').classList.remove('hidden')">+ Add current vial</button>
-      <button class="btn-ghost" id="exportBackup">Export Backup</button>
-      <button class="btn-ghost" id="importBackup">Import Backup</button>
-      <input type="file" id="importBackupFile" accept="application/json,.json" class="hidden">
-    </div>
-    <div id="addPeptideForm" class="form-card hidden" style="margin-top:12px;">
-      <div class="field-row">
-        <div class="field">
-          <label>Peptide name</label>
-          <input type="text" id="p-name" placeholder="e.g. BPC-157">
-        </div>
-        <div class="field">
-          <label>Concentration (mg/mL)</label>
-          <input type="number" id="p-conc" step="0.001" min="0" placeholder="e.g. 5">
-        </div>
-        <div class="field">
-          <label>Vial size (mL)</label>
-          <input type="number" id="p-size" step="0.01" min="0" placeholder="e.g. 3">
-        </div>
-        <div class="field">
-          <label>Dosing frequency (days)</label>
-          <input type="number" id="p-freq" step="0.25" min="0.01" inputmode="decimal" placeholder="e.g. 3">
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field" style="grid-column:1/-1;">
-          <label>Notes (optional)</label>
-          <input type="text" id="p-notes" placeholder="reconstitution details, source, etc.">
-        </div>
-      </div>
-      <div class="form-footer">
-        <button type="button" class="btn-ghost" id="cancelAddPeptide">Cancel</button>
-        <button type="button" class="btn-primary" id="saveAddPeptide">Save current vial</button>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <h2 class="section-title"><span class="idx">02</span> Vials in storage</h2>
-    <div id="storageVialGrid" class="vial-grid"></div>
-    <div style="margin-top:12px;">
-      <button type="button" class="btn-add" id="showAddStoredVial" onclick="document.getElementById('addStoredVialForm').classList.remove('hidden')">+ Add stored vial(s)</button>
-    </div>
-    <div id="addStoredVialForm" class="form-card hidden" style="margin-top:12px;">
-      <div class="field-row">
-        <div class="field">
-          <label>Peptide name</label>
-          <input type="text" id="sv-name" placeholder="e.g. Retatrutide">
-        </div>
-        <div class="field">
-          <label>Vial strength (mg)</label>
-          <input type="number" id="sv-strength" step="0.001" min="0" placeholder="e.g. 10">
-        </div>
-        <div class="field">
-          <label>Number of vials</label>
-          <input type="number" id="sv-qty" step="1" min="1" value="1" inputmode="numeric" placeholder="e.g. 5">
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field" style="grid-column:1/-1;">
-          <label>Notes (optional)</label>
-          <input type="text" id="sv-notes" placeholder="source, lot, BUD, storage location, etc.">
-        </div>
-      </div>
-      <div class="form-footer">
-        <button type="button" class="btn-ghost" id="cancelAddStoredVial">Cancel</button>
-        <button type="button" class="btn-primary" id="saveAddStoredVial">Save stored vials</button>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <h2 class="section-title"><span class="idx">03</span> Log an injection</h2>
+    <h2 class="section-title"><span class="idx">01</span> Log an injection</h2>
     <div class="form-card">
       <div class="field-row">
         <div class="field">
@@ -386,7 +311,7 @@
           <input type="datetime-local" id="log-date">
         </div>
         <div class="field">
-          <label>Dose (mg)</label>
+          <label id="doseMgLabel">Dose (mg)</label>
           <input type="number" id="log-dose-mg" step="0.001" min="0" placeholder="e.g. 0.25">
         </div>
         <div class="field">
@@ -419,6 +344,99 @@
   </section>
 
   <section>
+    <h2 class="section-title"><span class="idx">02</span> Current vial</h2>
+    <div id="vialGrid" class="vial-grid"></div>
+    <div class="data-actions" style="margin-top:12px;">
+      <button type="button" class="btn-add" id="showAddPeptide" onclick="document.getElementById('addPeptideForm').classList.remove('hidden')">+ Add current vial</button>
+      <button class="btn-ghost" id="exportBackup">Export Backup</button>
+      <button class="btn-ghost" id="importBackup">Import Backup</button>
+      <input type="file" id="importBackupFile" accept="application/json,.json" class="hidden">
+    </div>
+    <div id="addPeptideForm" class="form-card hidden" style="margin-top:12px;">
+      <div class="field-row">
+        <div class="field">
+          <label>Primary peptide</label>
+          <input type="text" id="p-name" placeholder="e.g. BPC-157">
+        </div>
+        <div class="field">
+          <label>Primary concentration (mg/mL)</label>
+          <input type="number" id="p-conc" step="0.001" min="0" placeholder="e.g. 5">
+        </div>
+        <div class="field">
+          <label>Vial size (mL)</label>
+          <input type="number" id="p-size" step="0.01" min="0" placeholder="e.g. 3">
+        </div>
+        <div class="field">
+          <label>Dosing frequency (days)</label>
+          <input type="number" id="p-freq" step="0.25" min="0.01" inputmode="decimal" placeholder="e.g. 3">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field" style="grid-column:1/-1;">
+          <label>Additional components (optional)</label>
+          <textarea id="p-components" rows="3" placeholder="One per line, e.g.
+TB-500 = 2.5
+GHK-Cu = 10"></textarea>
+          <div class="computed-ml">Enter each additional peptide as name = concentration in mg/mL.</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field" style="grid-column:1/-1;">
+          <label>Notes (optional)</label>
+          <input type="text" id="p-notes" placeholder="reconstitution details, source, etc.">
+        </div>
+      </div>
+      <div class="form-footer">
+        <button type="button" class="btn-ghost" id="cancelAddPeptide">Cancel</button>
+        <button type="button" class="btn-primary" id="saveAddPeptide">Save current vial</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title"><span class="idx">03</span> Vials in storage</h2>
+    <div id="storageVialGrid" class="vial-grid"></div>
+    <div style="margin-top:12px;">
+      <button type="button" class="btn-add" id="showAddStoredVial" onclick="document.getElementById('addStoredVialForm').classList.remove('hidden')">+ Add stored vial(s)</button>
+    </div>
+    <div id="addStoredVialForm" class="form-card hidden" style="margin-top:12px;">
+      <div class="field-row">
+        <div class="field">
+          <label>Primary peptide</label>
+          <input type="text" id="sv-name" placeholder="e.g. BPC-157">
+        </div>
+        <div class="field">
+          <label>Primary amount per vial (mg)</label>
+          <input type="number" id="sv-strength" step="0.001" min="0" placeholder="e.g. 10">
+        </div>
+        <div class="field">
+          <label>Number of vials</label>
+          <input type="number" id="sv-qty" step="1" min="1" value="1" inputmode="numeric" placeholder="e.g. 5">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field" style="grid-column:1/-1;">
+          <label>Additional components (optional)</label>
+          <textarea id="sv-components" rows="3" placeholder="One per line, e.g.
+TB-500 = 5
+GHK-Cu = 20"></textarea>
+          <div class="computed-ml">Enter each additional peptide as name = mg per vial. Concentrations are calculated when you reconstitute.</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field" style="grid-column:1/-1;">
+          <label>Notes (optional)</label>
+          <input type="text" id="sv-notes" placeholder="source, lot, BUD, storage location, etc.">
+        </div>
+      </div>
+      <div class="form-footer">
+        <button type="button" class="btn-ghost" id="cancelAddStoredVial">Cancel</button>
+        <button type="button" class="btn-primary" id="saveAddStoredVial">Save stored vials</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2 class="section-title"><span class="idx">04</span> History</h2>
     <div class="hist-controls">
       <select id="filterPeptide"><option value="all">All peptides</option></select>
@@ -435,6 +453,44 @@ let DATA = { peptides: [], logs: [], storedVials: [] };
 const STORAGE_KEY = 'peptide-tracker-data';
 
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function parseComponentLines(text){
+  const out = [];
+  const lines = String(text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  for(const line of lines){
+    const m = line.match(/^(.+?)\s*(?:=|:|,)\s*([0-9]*\.?[0-9]+)\s*(?:mg(?:\/mL)?)?\s*$/i);
+    if(!m) return {error:`Could not read component: ${line}`};
+    const value = parseFloat(m[2]);
+    if(!m[1].trim() || !isFinite(value) || value<=0) return {error:`Invalid component: ${line}`};
+    out.push({name:m[1].trim(), value});
+  }
+  return {components:out};
+}
+
+function getComponents(p){
+  if(Array.isArray(p.components) && p.components.length){
+    return p.components.map(c=>({name:c.name, concentration:Number(c.concentration)})).filter(c=>c.name && isFinite(c.concentration) && c.concentration>0);
+  }
+  if(p && p.name && Number(p.concentration)>0) return [{name:p.name, concentration:Number(p.concentration)}];
+  return [];
+}
+
+function getStoredComponents(v){
+  if(Array.isArray(v.components) && v.components.length){
+    return v.components.map(c=>({name:c.name, strengthMg:Number(c.strengthMg)})).filter(c=>c.name && isFinite(c.strengthMg) && c.strengthMg>0);
+  }
+  if(v && v.name && Number(v.strengthMg)>0) return [{name:v.name, strengthMg:Number(v.strengthMg)}];
+  return [];
+}
+
+function displayPeptideName(p){
+  const cs = getComponents(p);
+  return cs.length>1 ? cs.map(c=>c.name).join(' + ') : (p.name || 'Peptide');
+}
+
+function componentDoseText(components, doseMl){
+  return components.map(c=>`${c.name} ${(c.concentration*doseMl).toFixed(3).replace(/\.?0+$/,'')} mg`).join(' · ');
+}
+
 
 async function loadData(){
   try{
@@ -522,8 +578,8 @@ function renderVials(){
         <div class="gauge-pct mono">${Math.round(pct)}%</div>
       </div>
       <div class="card-body">
-        <h3>${escapeHtml(p.name)}</h3>
-        <span class="conc-line">${p.concentration} mg/mL</span>
+        <h3>${escapeHtml(displayPeptideName(p))}</h3>
+        ${getComponents(p).map(c=>`<span class="conc-line" style="margin-right:5px;">${escapeHtml(c.name)} ${c.concentration} mg/mL</span>`).join('')}
         <div class="stat-line"><b>${rem.toFixed(2)} mL</b> remaining of ${p.vial.totalMl} mL</div>
         <div class="stat-line">vial started ${formatDate(p.vial.startDate)}</div>
         ${p.dosingIntervalDays ? `<div class="stat-line"><b>Dosing:</b> ${formatFrequency(p.dosingIntervalDays)}</div>` : `<div class="stat-line"><b>Dosing:</b> not set</div>`}
@@ -547,8 +603,9 @@ function renderStoredVials(){
   }
   grid.innerHTML = DATA.storedVials.map(v=>`<div class="vial-card">
     <div class="card-body">
-      <h3>${escapeHtml(v.name)}</h3>
-      <span class="conc-line">${v.strengthMg} mg vial · concentration TBD</span>
+      <h3>${escapeHtml(getStoredComponents(v).map(c=>c.name).join(' + ') || v.name)}</h3>
+      ${getStoredComponents(v).map(c=>`<span class="conc-line" style="margin-right:5px;">${escapeHtml(c.name)} ${c.strengthMg} mg/vial</span>`).join('')}
+      <div class="stat-line">concentration TBD until reconstituted</div>
       <div class="stat-line"><b>${v.quantity}</b> vial${v.quantity===1?'':'s'} in storage</div>
       ${v.notes ? `<div class="stat-line">${escapeHtml(v.notes)}</div>` : ''}
       <div class="card-actions">
@@ -563,12 +620,15 @@ function renderStoredVials(){
 async function makeStoredVialCurrent(vialId){
   const sv = DATA.storedVials.find(v=>v.id===vialId);
   if(!sv) return;
-  const mlStr = prompt(`Reconstitute one ${sv.name} ${sv.strengthMg} mg vial.\nHow many mL of diluent did you add?`);
+  const storedComponents = getStoredComponents(sv);
+  const label = storedComponents.map(c=>c.name).join(' + ');
+  const mlStr = prompt(`Reconstitute one ${label} vial.\nHow many mL of diluent did you add?`);
   if(mlStr===null) return;
   const totalMl = parseFloat(mlStr);
   if(isNaN(totalMl) || totalMl<=0){ showToast('Enter a valid reconstitution volume'); return; }
-  const concentration = sv.strengthMg / totalMl;
-  let p = DATA.peptides.find(x=>x.name.trim().toLowerCase()===sv.name.trim().toLowerCase());
+  const components = storedComponents.map(c=>({name:c.name, concentration:c.strengthMg/totalMl}));
+  const primary = components[0];
+  let p = DATA.peptides.find(x=>displayPeptideName(x).toLowerCase()===label.toLowerCase());
   const currentFreq = p && p.dosingIntervalDays ? p.dosingIntervalDays : '';
   const freqStr = prompt(`Dosing frequency in days (optional):`, currentFreq);
   if(freqStr===null) return;
@@ -576,35 +636,44 @@ async function makeStoredVialCurrent(vialId){
   if(freq!==null && (isNaN(freq) || freq<=0)){ showToast('Enter a valid dosing frequency'); return; }
   if(p){
     const rem = remainingMl(p);
-    if(rem > 0.001 && !confirm(`${p.name} already has a current vial with about ${rem.toFixed(2)} mL remaining. Replace it with this newly reconstituted vial?`)) return;
-    p.concentration = concentration;
+    if(rem > 0.001 && !confirm(`${displayPeptideName(p)} already has a current vial with about ${rem.toFixed(2)} mL remaining. Replace it with this newly reconstituted vial?`)) return;
+    p.name = primary.name; p.concentration = primary.concentration; p.components = components;
     p.vial = {id:uid(), startDate:new Date().toISOString(), totalMl};
     if(freq!==null) p.dosingIntervalDays = freq;
   }else{
-    p = {id:uid(), name:sv.name, concentration, dosingIntervalDays:freq, notes:'', vial:{id:uid(), startDate:new Date().toISOString(), totalMl}};
+    p = {id:uid(), name:primary.name, concentration:primary.concentration, components, dosingIntervalDays:freq, notes:'', vial:{id:uid(), startDate:new Date().toISOString(), totalMl}};
     DATA.peptides.push(p);
   }
   sv.quantity -= 1;
   if(sv.quantity<=0) DATA.storedVials = DATA.storedVials.filter(v=>v.id!==sv.id);
   await saveData();
   render();
-  showToast(`Current vial: ${concentration.toFixed(3)} mg/mL`);
+  showToast('Vial reconstituted');
 }
 
 async function editStoredVial(vialId){
   const v = DATA.storedVials.find(x=>x.id===vialId);
   if(!v) return;
-  const strengthStr = prompt('Vial strength in mg:', v.strengthMg);
+  const comps = getStoredComponents(v);
+  const primary = comps[0] || {name:v.name, strengthMg:v.strengthMg};
+  const name = prompt('Primary peptide:', primary.name);
+  if(name===null) return;
+  const strengthStr = prompt('Primary amount per vial in mg:', primary.strengthMg);
   if(strengthStr===null) return;
   const strength = parseFloat(strengthStr);
-  if(isNaN(strength) || strength<=0){ showToast('Enter a valid vial strength'); return; }
+  if(!name.trim() || isNaN(strength) || strength<=0){ showToast('Enter a valid primary peptide and amount'); return; }
+  const extraDefault = comps.slice(1).map(c=>`${c.name} = ${c.strengthMg}`).join('\n');
+  const extraStr = prompt('Additional components, one per line as name = mg per vial:', extraDefault);
+  if(extraStr===null) return;
+  const parsed = parseComponentLines(extraStr);
+  if(parsed.error){ showToast(parsed.error); return; }
   const qtyStr = prompt('Quantity in storage:', v.quantity);
   if(qtyStr===null) return;
   const qty = parseInt(qtyStr,10);
   if(isNaN(qty) || qty<1){ showToast('Enter a valid quantity'); return; }
   const notes = prompt('Notes:', v.notes || '');
   if(notes===null) return;
-  v.strengthMg = strength; v.quantity = qty; v.notes = notes.trim();
+  v.name=name.trim(); v.strengthMg=strength; v.components=[{name:v.name,strengthMg:strength}, ...parsed.components.map(c=>({name:c.name,strengthMg:c.value}))]; v.quantity=qty; v.notes=notes.trim();
   await saveData(); render(); showToast('Stored vial updated');
 }
 
@@ -658,8 +727,8 @@ function populatePeptideSelects(){
   const logSel = document.getElementById('log-peptide');
   const filtSel = document.getElementById('filterPeptide');
   const prevLog = logSel.value, prevFilt = filtSel.value;
-  logSel.innerHTML = DATA.peptides.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
-  filtSel.innerHTML = `<option value="all">All peptides</option>` + DATA.peptides.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+  logSel.innerHTML = DATA.peptides.map(p=>`<option value="${p.id}">${escapeHtml(displayPeptideName(p))}</option>`).join('');
+  filtSel.innerHTML = `<option value="all">All peptides</option>` + DATA.peptides.map(p=>`<option value="${p.id}">${escapeHtml(displayPeptideName(p))}</option>`).join('');
   if(DATA.peptides.some(p=>p.id===prevLog)) logSel.value = prevLog;
   if(prevFilt) filtSel.value = prevFilt;
   updateComputedMl();
@@ -673,19 +742,23 @@ function getActivePeptide(){
 function refreshComputedLine(){
   const div = document.getElementById('computedMl');
   const p = getActivePeptide();
+  if(!p){ div.textContent=''; return; }
+  const components = getComponents(p);
+  const units = parseFloat(document.getElementById('log-dose-units').value);
   const mg = parseFloat(document.getElementById('log-dose-mg').value);
-  if(!p || isNaN(mg) || p.concentration<=0){ div.textContent=''; return; }
-  const ml = mg / p.concentration;
-  div.textContent = `= ${ml.toFixed(3)} mL  ·  from ${p.name} (${p.concentration} mg/mL)`;
+  let ml = isFinite(units) && units>0 ? units/100 : (isFinite(mg) && mg>0 && components[0] ? mg/components[0].concentration : NaN);
+  if(!isFinite(ml) || ml<=0){ div.textContent=''; return; }
+  div.textContent = `${ml.toFixed(3)} mL · ${componentDoseText(components, ml)}`;
 }
 
 function syncFromMg(){
   const p = getActivePeptide();
   const mgEl = document.getElementById('log-dose-mg');
   const unitsEl = document.getElementById('log-dose-units');
+  const components = p ? getComponents(p) : [];
   const mg = parseFloat(mgEl.value);
-  if(!p || isNaN(mg) || p.concentration<=0){ refreshComputedLine(); return; }
-  const units = (mg / p.concentration) * 100;
+  if(!p || !components[0] || isNaN(mg)){ refreshComputedLine(); return; }
+  const units = (mg / components[0].concentration) * 100;
   unitsEl.value = Math.round(units*10)/10;
   refreshComputedLine();
 }
@@ -694,15 +767,19 @@ function syncFromUnits(){
   const p = getActivePeptide();
   const mgEl = document.getElementById('log-dose-mg');
   const unitsEl = document.getElementById('log-dose-units');
+  const components = p ? getComponents(p) : [];
   const units = parseFloat(unitsEl.value);
-  if(!p || isNaN(units) || p.concentration<=0){ refreshComputedLine(); return; }
-  const mg = (units/100) * p.concentration;
+  if(!p || !components[0] || isNaN(units)){ refreshComputedLine(); return; }
+  const mg = (units/100) * components[0].concentration;
   mgEl.value = Math.round(mg*1000)/1000;
   refreshComputedLine();
 }
 
 function updateComputedMl(){
-  // re-derive units from whatever mg currently holds (used after peptide switch)
+  const p = getActivePeptide();
+  const cs = p ? getComponents(p) : [];
+  const label = document.getElementById('doseMgLabel');
+  if(label) label.textContent = cs.length>1 ? `Dose (mg, ${cs[0].name})` : 'Dose (mg)';
   syncFromMg();
 }
 
@@ -717,12 +794,12 @@ function renderHistory(){
   }
   const rows = logs.map(l=>{
     const p = DATA.peptides.find(x=>x.id===l.peptideId);
-    const name = p ? p.name : '(deleted peptide)';
+    const name = p ? displayPeptideName(p) : (l.peptideName || '(deleted peptide)');
     const isNewVial = p && l.vialId === p.vial.id && DATA.logs.filter(x=>x.vialId===l.vialId).sort((a,b)=>new Date(a.date)-new Date(b.date))[0]?.id === l.id && l.isVialStart;
     return `<tr>
       <td data-label="Date">${formatDateTime(l.date)}</td>
       <td data-label="Peptide">${escapeHtml(name)}</td>
-      <td class="dose-cell" data-label="Dose">${l.doseMg!=null ? l.doseMg+' mg / '+l.doseMl.toFixed(3)+' mL / '+(l.doseMl*100).toFixed(1)+' u' : '—'}</td>
+      <td class="dose-cell" data-label="Dose">${l.componentDoses && l.componentDoses.length ? `${l.doseMl.toFixed(3)} mL / ${(l.doseMl*100).toFixed(1)} u · `+l.componentDoses.map(c=>escapeHtml(c.name)+' '+Number(c.doseMg).toFixed(3).replace(/\.?0+$/,'')+' mg').join(' · ') : (l.doseMg!=null ? l.doseMg+' mg / '+l.doseMl.toFixed(3)+' mL / '+(l.doseMl*100).toFixed(1)+' u' : '—')}</td>
       <td data-label="Site">${escapeHtml(l.site||'—')}</td>
       <td data-label="Notes">${escapeHtml(l.note||'')}</td>
       <td data-label="Actions">
@@ -748,7 +825,7 @@ function render(){
 function quickLog(peptideId){
   document.getElementById('log-peptide').value = peptideId;
   updateComputedMl();
-  document.getElementById('log-dose-mg').focus();
+  (getComponents(getActivePeptide()||{}).length>1 ? document.getElementById('log-dose-units') : document.getElementById('log-dose-mg')).focus();
   document.getElementById('log-peptide').scrollIntoView({behavior:'smooth', block:'center'});
 }
 
@@ -763,7 +840,7 @@ async function startNewVial(peptideId){
   if(concStr===null) return;
   const conc = parseFloat(concStr);
   p.vial = { id: uid(), startDate: new Date().toISOString(), totalMl: size };
-  if(!isNaN(conc) && conc>0) p.concentration = conc;
+  if(!isNaN(conc) && conc>0){ p.concentration = conc; if(Array.isArray(p.components) && p.components[0]) p.components[0].concentration = conc; }
   await saveData();
   render();
   showToast('New vial started');
@@ -779,55 +856,78 @@ async function deleteLog(logId){
 async function editVial(peptideId){
   const p = DATA.peptides.find(x=>x.id===peptideId);
   if(!p) return;
-  const sizeStr = prompt(`Edit vial for ${p.name}.\nVial size in mL:`, p.vial.totalMl);
+  const sizeStr = prompt(`Edit vial for ${displayPeptideName(p)}.\nVial size in mL:`, p.vial.totalMl);
   if(sizeStr===null) return;
   const size = parseFloat(sizeStr);
   if(isNaN(size) || size<=0){ showToast('Enter a valid vial size'); return; }
   const startStr = prompt(`Vial start date (YYYY-MM-DD):`, p.vial.startDate.slice(0,10));
   if(startStr===null) return;
   const startDate = new Date(startStr);
-  const concStr = prompt(`Concentration in mg/mL:`, p.concentration);
+  const comps = getComponents(p);
+  const primary = comps[0] || {name:p.name, concentration:p.concentration};
+  const primaryName = prompt('Primary peptide:', primary.name);
+  if(primaryName===null) return;
+  const concStr = prompt(`Primary concentration in mg/mL:`, primary.concentration);
   if(concStr===null) return;
   const conc = parseFloat(concStr);
-  if(isNaN(conc) || conc<=0){ showToast('Enter a valid concentration'); return; }
+  if(!primaryName.trim() || isNaN(conc) || conc<=0){ showToast('Enter a valid primary peptide and concentration'); return; }
+  const extraDefault = comps.slice(1).map(c=>`${c.name} = ${c.concentration}`).join('\n');
+  const extraStr = prompt('Additional components, one per line as name = mg/mL:', extraDefault);
+  if(extraStr===null) return;
+  const parsed = parseComponentLines(extraStr);
+  if(parsed.error){ showToast(parsed.error); return; }
   const freqStr = prompt(`Dosing frequency in days (leave blank for none):`, p.dosingIntervalDays || '');
   if(freqStr===null) return;
   const freq = freqStr.trim()==='' ? null : parseFloat(freqStr);
   if(freq!==null && (isNaN(freq) || freq<=0)){ showToast('Enter a valid dosing frequency'); return; }
   p.vial.totalMl = size;
   if(!isNaN(startDate)) p.vial.startDate = startDate.toISOString();
-  p.concentration = conc;
+  p.name = primaryName.trim(); p.concentration = conc;
+  p.components = [{name:p.name, concentration:conc}, ...parsed.components.map(c=>({name:c.name, concentration:c.value}))];
   p.dosingIntervalDays = freq;
-  await saveData();
-  render();
-  showToast('Vial updated');
+  await saveData(); render(); showToast('Vial updated');
 }
 
 async function editLog(logId){
   const l = DATA.logs.find(x=>x.id===logId);
   if(!l) return;
   const p = DATA.peptides.find(x=>x.id===l.peptideId);
-  const doseStr = prompt(`Dose in mg:`, l.doseMg);
-  if(doseStr===null) return;
-  const doseMg = parseFloat(doseStr);
-  if(isNaN(doseMg) || doseMg<=0){ showToast('Enter a valid dose'); return; }
+  const isBlend = Array.isArray(l.componentDoses) && l.componentDoses.length>1;
+  let doseMl = l.doseMl;
+  if(isBlend){
+    const unitsStr = prompt('Dose in U-100 units:', (l.doseMl*100).toFixed(1));
+    if(unitsStr===null) return;
+    const units = parseFloat(unitsStr);
+    if(isNaN(units) || units<=0){ showToast('Enter a valid dose in units'); return; }
+    doseMl = units/100;
+  }else{
+    const doseStr = prompt('Dose in mg:', l.doseMg);
+    if(doseStr===null) return;
+    const doseMg = parseFloat(doseStr);
+    if(isNaN(doseMg) || doseMg<=0){ showToast('Enter a valid dose'); return; }
+    const conc = l.componentDoses && l.componentDoses[0] ? Number(l.componentDoses[0].concentration) : (p ? Number(p.concentration) : NaN);
+    if(isFinite(conc) && conc>0) doseMl = doseMg/conc;
+    l.doseMg = doseMg;
+  }
   const dt = new Date(l.date);
   dt.setMinutes(dt.getMinutes() - dt.getTimezoneOffset());
-  const dateStr = prompt(`Date & time (YYYY-MM-DDTHH:MM):`, dt.toISOString().slice(0,16));
+  const dateStr = prompt('Date & time (YYYY-MM-DDTHH:MM):', dt.toISOString().slice(0,16));
   if(dateStr===null) return;
-  const site = prompt(`Injection site:`, l.site || '');
+  const site = prompt('Injection site:', l.site || '');
   if(site===null) return;
-  const note = prompt(`Notes:`, l.note || '');
+  const note = prompt('Notes:', l.note || '');
   if(note===null) return;
   const newDate = dateStr ? new Date(dateStr) : new Date(l.date);
-  l.doseMg = doseMg;
-  l.doseMl = p ? doseMg / p.concentration : l.doseMl;
+  l.doseMl = doseMl;
+  if(Array.isArray(l.componentDoses) && l.componentDoses.length){
+    l.componentDoses = l.componentDoses.map(c=>({...c, doseMg:Number(c.concentration)*doseMl}));
+    l.doseMg = l.componentDoses[0].doseMg;
+  }else if(p){
+    l.doseMg = doseMl * Number(p.concentration);
+  }
   if(!isNaN(newDate)) l.date = newDate.toISOString();
-  l.site = site.trim();
-  l.note = note.trim();
-  await saveData();
-  render();
-  showToast('Entry updated');
+  l.site = site.trim(); l.note = note.trim();
+  await saveData(); render(); showToast('Entry updated');
 }
 
 async function exportBackup(){
@@ -897,16 +997,18 @@ document.getElementById('saveAddStoredVial').addEventListener('click', async ()=
   const strength = parseFloat(document.getElementById('sv-strength').value);
   const qty = parseInt(document.getElementById('sv-qty').value,10);
   const notes = document.getElementById('sv-notes').value.trim();
+  const parsed = parseComponentLines(document.getElementById('sv-components').value);
+  if(parsed.error){ showToast(parsed.error); return; }
   if(!name || isNaN(strength) || strength<=0 || isNaN(qty) || qty<1){
-    showToast('Fill in name, vial strength, and number of vials'); return;
+    showToast('Fill in primary peptide, amount, and number of vials'); return;
   }
-  const existing = DATA.storedVials.find(v=>v.name.toLowerCase()===name.toLowerCase() && Number(v.strengthMg)===strength && (v.notes||'')===notes);
+  const components = [{name,strengthMg:strength}, ...parsed.components.map(c=>({name:c.name,strengthMg:c.value}))];
+  const signature = JSON.stringify(components);
+  const existing = DATA.storedVials.find(v=>JSON.stringify(getStoredComponents(v))===signature && (v.notes||'')===notes);
   if(existing) existing.quantity += qty;
-  else DATA.storedVials.push({id:uid(), name, strengthMg:strength, quantity:qty, notes});
-  document.getElementById('sv-name').value='';
-  document.getElementById('sv-strength').value='';
-  document.getElementById('sv-qty').value='1';
-  document.getElementById('sv-notes').value='';
+  else DATA.storedVials.push({id:uid(), name, strengthMg:strength, components, quantity:qty, notes});
+  document.getElementById('sv-name').value=''; document.getElementById('sv-strength').value='';
+  document.getElementById('sv-components').value=''; document.getElementById('sv-qty').value='1'; document.getElementById('sv-notes').value='';
   document.getElementById('addStoredVialForm').classList.add('hidden');
   await saveData(); render(); showToast(qty === 1 ? 'Stored vial added' : `${qty} stored vials added`);
 });
@@ -921,24 +1023,17 @@ document.getElementById('saveAddPeptide').addEventListener('click', async ()=>{
   const freqRaw = document.getElementById('p-freq').value.trim();
   const freq = freqRaw==='' ? null : parseFloat(freqRaw);
   const notes = document.getElementById('p-notes').value.trim();
+  const parsed = parseComponentLines(document.getElementById('p-components').value);
+  if(parsed.error){ showToast(parsed.error); return; }
   if(!name || isNaN(conc) || conc<=0 || isNaN(size) || size<=0 || (freq!==null && (isNaN(freq) || freq<=0))){
-    showToast('Fill in name, concentration, vial size, and a valid frequency');
-    return;
+    showToast('Fill in primary peptide, concentration, vial size, and a valid frequency'); return;
   }
-  DATA.peptides.push({
-    id: uid(),
-    name, concentration: conc, dosingIntervalDays: freq, notes,
-    vial: { id: uid(), startDate: new Date().toISOString(), totalMl: size }
-  });
-  document.getElementById('p-name').value='';
-  document.getElementById('p-conc').value='';
-  document.getElementById('p-size').value='';
-  document.getElementById('p-freq').value='';
-  document.getElementById('p-notes').value='';
+  const components = [{name, concentration:conc}, ...parsed.components.map(c=>({name:c.name, concentration:c.value}))];
+  DATA.peptides.push({id:uid(), name, concentration:conc, components, dosingIntervalDays:freq, notes, vial:{id:uid(), startDate:new Date().toISOString(), totalMl:size}});
+  document.getElementById('p-name').value=''; document.getElementById('p-conc').value=''; document.getElementById('p-components').value='';
+  document.getElementById('p-size').value=''; document.getElementById('p-freq').value=''; document.getElementById('p-notes').value='';
   document.getElementById('addPeptideForm').classList.add('hidden');
-  await saveData();
-  render();
-  showToast('Peptide added');
+  await saveData(); render(); showToast('Current vial added');
 });
 
 document.getElementById('log-peptide').addEventListener('change', updateComputedMl);
@@ -951,23 +1046,20 @@ document.getElementById('saveLog').addEventListener('click', async ()=>{
   const p = DATA.peptides.find(x=>x.id===pid);
   if(!p){ showToast('Add a peptide first'); return; }
   const dateVal = document.getElementById('log-date').value;
-  const doseMg = parseFloat(document.getElementById('log-dose-mg').value);
+  const units = parseFloat(document.getElementById('log-dose-units').value);
+  const mg = parseFloat(document.getElementById('log-dose-mg').value);
   const site = document.getElementById('log-site').value.trim();
   const note = document.getElementById('log-note').value.trim();
-  if(isNaN(doseMg) || doseMg<=0){ showToast('Enter a dose in mg'); return; }
-  const doseMl = doseMg / p.concentration;
+  const components = getComponents(p);
+  let doseMl = isFinite(units) && units>0 ? units/100 : (isFinite(mg) && mg>0 && components[0] ? mg/components[0].concentration : NaN);
+  if(!isFinite(doseMl) || doseMl<=0){ showToast(components.length>1 ? 'Enter dose in units' : 'Enter a dose'); return; }
+  const doseMg = components[0] ? doseMl*components[0].concentration : mg;
+  const componentDoses = components.map(c=>({name:c.name, concentration:c.concentration, doseMg:c.concentration*doseMl}));
   const date = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
-  DATA.logs.push({
-    id: uid(), peptideId: p.id, vialId: p.vial.id,
-    date, doseMg, doseMl, site, note
-  });
-  document.getElementById('log-dose-mg').value='';
-  document.getElementById('log-site').value='';
-  document.getElementById('log-note').value='';
-  document.getElementById('computedMl').textContent='';
-  await saveData();
-  render();
-  showToast('Dose logged');
+  DATA.logs.push({id:uid(), peptideId:p.id, peptideName:displayPeptideName(p), vialId:p.vial.id, date, doseMg, doseMl, componentDoses, site, note});
+  document.getElementById('log-dose-mg').value=''; document.getElementById('log-dose-units').value='';
+  document.getElementById('log-site').value=''; document.getElementById('log-note').value=''; document.getElementById('computedMl').textContent='';
+  await saveData(); render(); showToast('Dose logged');
 });
 
 // default datetime to now
