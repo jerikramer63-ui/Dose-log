@@ -188,7 +188,16 @@
     font-size:12px;
     color:var(--teal-deep);
     margin-top:4px;
+  }  .last-dose-line{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:0 0 12px;
+    padding:8px 10px;
+    background:var(--teal-tint);
+    border-radius:5px;
   }
+  .last-dose-line b{color:var(--ink);font-weight:600;}
+
   .form-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:4px;}
 
   /* History table */
@@ -301,6 +310,7 @@
   <section>
     <h2 class="section-title"><span class="idx">01</span> Log an injection</h2>
     <div class="form-card">
+      <div id="lastDoseLine" class="last-dose-line">No previous dose logged for this vial.</div>
       <div class="field-row">
         <div class="field">
           <label>Peptide</label>
@@ -775,11 +785,32 @@ function syncFromUnits(){
   refreshComputedLine();
 }
 
+function updateLastDoseLine(){
+  const div = document.getElementById('lastDoseLine');
+  const p = getActivePeptide();
+  if(!div) return;
+  if(!p){ div.textContent = 'No current vial selected.'; return; }
+  const logs = DATA.logs.filter(l=>l.peptideId===p.id).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(!logs.length){ div.textContent = 'No previous dose logged for this vial.'; return; }
+  const l = logs[0];
+  const comps = Array.isArray(l.componentDoses) && l.componentDoses.length ? l.componentDoses : null;
+  let amount;
+  if(comps){
+    amount = comps.map(c=>`${c.name} ${Number(c.doseMg).toFixed(3).replace(/\.?0+$/,'')} mg`).join(' · ');
+  }else if(l.doseMg!=null){
+    amount = `${l.doseMg} mg`;
+  }else if(l.doseMl!=null){
+    amount = `${(l.doseMl*100).toFixed(1)} units`;
+  }else{ amount = 'dose recorded'; }
+  div.innerHTML = `<b>Most recent:</b> ${escapeHtml(amount)} · ${escapeHtml(formatDateTime(l.date))}`;
+}
+
 function updateComputedMl(){
   const p = getActivePeptide();
   const cs = p ? getComponents(p) : [];
   const label = document.getElementById('doseMgLabel');
   if(label) label.textContent = cs.length>1 ? `Dose (mg, ${cs[0].name})` : 'Dose (mg)';
+  updateLastDoseLine();
   syncFromMg();
 }
 
