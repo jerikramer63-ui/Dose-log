@@ -598,6 +598,7 @@ function renderVials(){
         <div class="card-actions">
           <button class="btn-ghost" onclick="quickLog('${p.id}')">Log dose</button>
           <button class="btn-ghost" onclick="editVial('${p.id}')">Edit vial</button>
+          <button class="btn-danger-ghost" onclick="removeCurrentVial('${p.id}')">Remove vial</button>
           <button class="btn-danger-ghost" onclick="startNewVial('${p.id}')">New vial</button>
         </div>
       </div>
@@ -875,6 +876,20 @@ async function startNewVial(peptideId){
   await saveData();
   render();
   showToast('New vial started');
+}
+
+async function removeCurrentVial(peptideId){
+  const p = DATA.peptides.find(x=>x.id===peptideId);
+  if(!p) return;
+  const relatedLogs = DATA.logs.filter(l=>l.peptideId===peptideId).length;
+  const msg = relatedLogs
+    ? `Remove ${displayPeptideName(p)} from Current vial?\n\nIts ${relatedLogs} injection log entr${relatedLogs===1?'y':'ies'} will stay in History.`
+    : `Remove ${displayPeptideName(p)} from Current vial?`;
+  if(!confirm(msg)) return;
+  DATA.peptides = DATA.peptides.filter(x=>x.id!==peptideId);
+  await saveData();
+  render();
+  showToast('Vial removed from current');
 }
 
 async function deleteLog(logId){
