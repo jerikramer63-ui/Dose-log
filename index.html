@@ -260,6 +260,26 @@
   select[disabled], input[disabled]{opacity:.55;}
   .hidden{display:none !important;}
 
+  /* Injection-site rotation */
+  .site-rotation{
+    margin:14px 0 12px;
+    padding:14px 16px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#FBF9F4;
+  }
+  .site-rotation-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:10px;flex-wrap:wrap;}
+  .site-rotation-title{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:600;}
+  .site-suggestion{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--teal-deep);}
+  .site-rotation select{
+    width:100%;font-family:'Inter',sans-serif;font-size:14px;padding:9px 10px;
+    border:1px solid var(--line-strong);border-radius:5px;background:#fff;color:var(--ink);
+  }
+  .recent-sites-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:600;margin:12px 0 6px;}
+  .recent-sites{display:flex;gap:6px;flex-wrap:wrap;}
+  .site-chip{font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:4px 7px;border:1px solid var(--line);border-radius:4px;background:var(--card);}
+  .site-chip:first-child{border-color:var(--teal);color:var(--teal-deep);}
+  .recent-sites-empty{font-size:12.5px;color:var(--ink-soft);}
 
   /* Mobile layout */
   .data-actions{display:flex;gap:8px;flex-wrap:wrap;}
@@ -273,6 +293,7 @@
     .field-row{grid-template-columns:1fr;gap:10px;}
     .field{grid-column:1/-1 !important;}
     .field input, .field select, .field textarea{font-size:16px;min-height:44px;}
+    .site-rotation select{font-size:16px;min-height:44px;}
     button{min-height:42px;font-size:13.5px;padding:9px 13px;}
     .form-footer{justify-content:stretch;}
     .form-footer button{flex:1;}
@@ -328,17 +349,26 @@
           <label>Dose (units, U-100)</label>
           <input type="number" id="log-dose-units" step="0.1" min="0" placeholder="e.g. 25">
         </div>
-        <div class="field">
-          <label>Injection site</label>
-          <input type="text" id="log-site" list="site-options" placeholder="e.g. Abdomen (L)">
-          <datalist id="site-options">
-            <option value="Abdomen (L)"><option value="Abdomen (R)">
-            <option value="OLA"><option value="ILA"><option value="IRA"><option value="ORA">
-            <option value="Thigh (L)"><option value="Thigh (R)">
-            <option value="Glute (L)"><option value="Glute (R)">
-            <option value="Upper arm (L)"><option value="Upper arm (R)">
-          </datalist>
+      </div>
+      <div class="site-rotation">
+        <div class="site-rotation-head">
+          <div class="site-rotation-title">Injection site</div>
+          <div id="siteSuggestion" class="site-suggestion"></div>
         </div>
+        <select id="log-site" aria-label="Injection site">
+          <option value="L Thigh">L Thigh</option>
+          <option value="R Thigh">R Thigh</option>
+          <option value="OLA">OLA</option>
+          <option value="ILA">ILA</option>
+          <option value="IRA">IRA</option>
+          <option value="ORA">ORA</option>
+          <option value="LMA">LMA</option>
+          <option value="RMA">RMA</option>
+          <option value="LUA">LUA</option>
+          <option value="RUA">RUA</option>
+        </select>
+        <div class="recent-sites-label">Last 5 sites · newest first</div>
+        <div id="recentSites" class="recent-sites"></div>
       </div>
       <div class="field-row">
         <div class="field" style="grid-column:1/-1;">
@@ -734,6 +764,43 @@ function nextDoseForPeptide(p){
   return d;
 }
 
+const INJECTION_SITES = ['L Thigh','R Thigh','OLA','ILA','IRA','ORA','LMA','RMA','LUA','RUA'];
+
+function recentSiteLogs(limit=5){
+  return DATA.logs
+    .filter(l=>l.site && INJECTION_SITES.includes(l.site))
+    .sort((a,b)=>new Date(b.date)-new Date(a.date))
+    .slice(0,limit);
+}
+
+function suggestedInjectionSite(){
+  const logs = DATA.logs
+    .filter(l=>l.site && INJECTION_SITES.includes(l.site))
+    .sort((a,b)=>new Date(b.date)-new Date(a.date));
+  // Prefer a site that has never been used; otherwise choose the one used least recently.
+  const lastUsed = new Map();
+  for(const l of logs){
+    if(!lastUsed.has(l.site)) lastUsed.set(l.site, new Date(l.date).getTime());
+  }
+  const neverUsed = INJECTION_SITES.find(site=>!lastUsed.has(site));
+  if(neverUsed) return neverUsed;
+  return [...INJECTION_SITES].sort((a,b)=>lastUsed.get(a)-lastUsed.get(b))[0];
+}
+
+function updateSiteRotation(forceSuggestion=false){
+  const sel = document.getElementById('log-site');
+  const recent = document.getElementById('recentSites');
+  const suggestionEl = document.getElementById('siteSuggestion');
+  if(!sel || !recent || !suggestionEl) return;
+  const suggestion = suggestedInjectionSite();
+  suggestionEl.textContent = suggestion ? `Suggested next: ${suggestion}` : '';
+  const items = recentSiteLogs(5);
+  recent.innerHTML = items.length
+    ? items.map(l=>`<span class="site-chip">${escapeHtml(l.site)}</span>`).join('')
+    : `<span class="recent-sites-empty">No sites logged yet.</span>`;
+  if(forceSuggestion || !INJECTION_SITES.includes(sel.value)) sel.value = suggestion || INJECTION_SITES[0];
+}
+
 function populatePeptideSelects(){
   const logSel = document.getElementById('log-peptide');
   const filtSel = document.getElementById('filterPeptide');
@@ -851,6 +918,7 @@ function render(){
   renderStoredVials();
   populatePeptideSelects();
   renderHistory();
+  updateSiteRotation(true);
 }
 
 // --- Actions ---
@@ -1096,6 +1164,7 @@ document.getElementById('saveLog').addEventListener('click', async ()=>{
   const mg = parseFloat(document.getElementById('log-dose-mg').value);
   const site = document.getElementById('log-site').value.trim();
   const note = document.getElementById('log-note').value.trim();
+  if(!INJECTION_SITES.includes(site)){ showToast('Choose an injection site'); return; }
   const components = getComponents(p);
   let doseMl = isFinite(units) && units>0 ? units/100 : (isFinite(mg) && mg>0 && components[0] ? mg/components[0].concentration : NaN);
   if(!isFinite(doseMl) || doseMl<=0){ showToast(components.length>1 ? 'Enter dose in units' : 'Enter a dose'); return; }
@@ -1104,8 +1173,8 @@ document.getElementById('saveLog').addEventListener('click', async ()=>{
   const date = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
   DATA.logs.push({id:uid(), peptideId:p.id, peptideName:displayPeptideName(p), vialId:p.vial.id, date, doseMg, doseMl, componentDoses, site, note});
   document.getElementById('log-dose-mg').value=''; document.getElementById('log-dose-units').value='';
-  document.getElementById('log-site').value=''; document.getElementById('log-note').value=''; document.getElementById('computedMl').textContent='';
-  await saveData(); render(); showToast('Dose logged');
+  document.getElementById('log-note').value=''; document.getElementById('computedMl').textContent='';
+  await saveData(); render(); updateSiteRotation(true); showToast('Dose logged');
 });
 
 // default datetime to now
