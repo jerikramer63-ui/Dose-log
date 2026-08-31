@@ -356,16 +356,18 @@
           <div id="siteSuggestion" class="site-suggestion"></div>
         </div>
         <select id="log-site" aria-label="Injection site">
-          <option value="L Thigh">L Thigh</option>
-          <option value="R Thigh">R Thigh</option>
-          <option value="OLA">OLA</option>
-          <option value="ILA">ILA</option>
-          <option value="IRA">IRA</option>
-          <option value="ORA">ORA</option>
-          <option value="LMA">LMA</option>
-          <option value="RMA">RMA</option>
-          <option value="LUA">LUA</option>
-          <option value="RUA">RUA</option>
+          <option value="L thigh">L thigh</option>
+          <option value="R thigh">R thigh</option>
+          <option value="L Arm">L Arm</option>
+          <option value="R Arm">R Arm</option>
+          <option value="L glute">L glute</option>
+          <option value="R glute">R glute</option>
+          <option value="Upper R Ab">Upper R Ab</option>
+          <option value="Lower R Ab">Lower R Ab</option>
+          <option value="Upper L Ab">Upper L Ab</option>
+          <option value="Lower L Ab">Lower L Ab</option>
+          <option value="L Love Handle">L Love Handle</option>
+          <option value="R Love Handle">R Love Handle</option>
         </select>
         <div class="recent-sites-label">Last 5 sites · newest first</div>
         <div id="recentSites" class="recent-sites"></div>
@@ -768,7 +770,7 @@ const INJECTION_SITES = ['L thigh','R thigh','L Arm','R Arm','L glute','R glute'
 
 function recentSiteLogs(limit=5){
   return DATA.logs
-    .filter(l=>l.site && INJECTION_SITES.includes(l.site))
+    .filter(l=>l.site)
     .sort((a,b)=>new Date(b.date)-new Date(a.date))
     .slice(0,limit);
 }
